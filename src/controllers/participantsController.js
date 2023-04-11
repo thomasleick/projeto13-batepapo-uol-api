@@ -20,7 +20,7 @@ const postParticipant = async (req, res) => {
                 to: 'Todos', 
                 text: 'entra na sala...', 
                 type: 'status', 
-                time: Date.now()
+                
             }
         )
         if (returnStatus === 201)

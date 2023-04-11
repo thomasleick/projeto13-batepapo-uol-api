@@ -1,4 +1,5 @@
 const Message = require("../model/Messages")
+const Participant = require("../model/Participants")
 const Joi = require('joi');
 
 const getMessages = async (req, res) => {
@@ -45,16 +46,41 @@ const getMessages = async (req, res) => {
 }
 
 const postMessage = async(req, res) => {
-    let isBody = true
-    console.log(req)
+    const time = Date.now();
 
-    verifyBody = () => {
-        if (req?.body)
-            return req.body
-        isBody = false
-        return req
-    }
-    const { from, to, text, type, time } = verifyBody()
+    const verifyBody = (req) => {
+        if (req.body) {
+          return { ...req.body, from: req.headers?.user };
+        }
+        return req;
+      };
+      const body = verifyBody(req);
+      const isBody = body.type === 'message' || body.type === 'private_message';
+    
+      const postMessageSchema = isBody
+        ? Joi.object({
+            from: Joi.string().required(),
+            to: Joi.string().required(),
+            text: Joi.string().required(),
+            type: Joi.string().valid('message', 'private_message').required(),
+          })
+        : Joi.object({
+            from: Joi.string().required(),
+            to: Joi.string().required(),
+            text: Joi.string().required(),
+            type: Joi.string().valid('status').required(),
+          });
+    
+      const { error, value } = postMessageSchema.validate(body);
+
+      if (error) {
+        return res.status(422).json({ message: error.message });
+      }
+  
+    const { from, to, text, type } = value;
+
+    if (!await Participant.findOne({ name: from }).exec())
+        return res.status(422).json({ message: 'Name not found on participants list...' });
 
     try {
         const result = await Message.create({ from, to, text, type, time })
