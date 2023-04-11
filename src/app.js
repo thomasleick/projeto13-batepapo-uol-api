@@ -13,6 +13,8 @@ app.use(express.json());
 
 // ROTAS
 app.use('/participants', require('./routes/participants'))
+app.use('/messages', require('./routes/messages'))
+
 
 // Start
 const PORT = 5000;

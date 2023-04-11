@@ -56,6 +56,23 @@ const postMessage = async(req, res) => {
 
 }
 
+const getParticipants = async (req, res) => {
+
+    try {
+        const result = await Participant.find()
+        
+        if (!result) return res.status(204).json([]);
+
+        const participantsList = result.map(participant => participant.name)
+        
+        res.json(participantsList);
+
+    } catch (err) {
+        return res.status(500).json({ 'message': err.message })
+    }
+}
+
 module.exports = {
-    postParticipant
+    postParticipant,
+    getParticipants
 }
