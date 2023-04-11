@@ -12,7 +12,7 @@ connectDB()
 app.use(express.json());
 
 // ROTAS
-
+app.use('/participants', require('./routes/participants'))
 
 // Start
 const PORT = 5000;
