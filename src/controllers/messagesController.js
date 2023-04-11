@@ -3,6 +3,10 @@ const Joi = require('joi');
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
+    const user = req.headers.user;
+
+    if (!user)
+        return res.status(422).json({'message': 'user is required on header.'})
 
     const limitSchema = Joi.number()
         .integer()
@@ -21,7 +25,7 @@ const getMessages = async (req, res) => {
             limit = value;
         } else
             limit = Infinity;
-        const user = req.headers.user;
+        
         const query = {
             $or: [
               { type: { $ne: 'private_message' } },
@@ -57,7 +61,7 @@ const postMessage = async(req, res) => {
 
         console.log(result)
         if (isBody)
-            return res.status(201).json({ 'success': `New participant ${name} created!`})
+            return res.status(201).json({ 'success': `New participant ${from} created!`})
         return 201
     } catch (err) {
         if(isBody)
