@@ -1,5 +1,6 @@
 const Participant = require('../model/Participants');
 const Message = require("../model/Messages")
+const { postMessage } = require("./messagesController")
 
 const postParticipant = async (req, res) => {
     const { name } = req?.body
@@ -15,7 +16,7 @@ const postParticipant = async (req, res) => {
 
         const returnStatus = await postMessage( 
             { 
-                from :name, 
+                from: name, 
                 to: 'Todos', 
                 text: 'entra na sala...', 
                 type: 'status', 
@@ -29,32 +30,6 @@ const postParticipant = async (req, res) => {
     }
 }
 
-const postMessage = async(req, res) => {
-    let isBody = true
-    console.log(req)
-
-    verifyBody = () => {
-        if (req?.body)
-            return req.body
-        isBody = false
-        return req
-    }
-    const { from, to, text, type, time } = verifyBody()
-
-    try {
-        const result = await Message.create({ from, to, text, type, time })
-
-        console.log(result)
-        if (isBody)
-            return res.status(201).json({ 'success': `New participant ${name} created!`})
-        return 201
-    } catch (err) {
-        if(isBody)
-            return res.status(500).json({'message': err.message})
-        return 500
-    }
-
-}
 
 const getParticipants = async (req, res) => {
 
