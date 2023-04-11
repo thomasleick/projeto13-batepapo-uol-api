@@ -14,6 +14,7 @@ app.use(express.json());
 // ROTAS
 app.use('/participants', require('./routes/participants'))
 app.use('/messages', require('./routes/messages'))
+app.use('/status', require('./routes/status'))
 
 
 // Start
