@@ -109,8 +109,41 @@ const postMessage = async (req, res) => {
 
 }
 
+const deleteMessage = async (req, res) => {
+
+    const { id } = req.params;
+    const user = req.headers.user;
+    
+    if (!id || !user)
+        return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
+
+
+    try {
+        // Check if message with given ID exists
+        const message = await Message.findOne({ _id: id }).exec();
+        if (!message) {
+        return res.status(404).json({ message: 'Message not found' });
+        }
+    
+        // Check if user is the owner of the message
+        if (message.from !== user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        // Delete the message from the messages collection
+        await Message.deleteOne({ _id: id }).exec();
+        
+        // Return success message
+        return res.json({ message: 'Message deleted successfully' });
+    } 
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ 'message': err.message })
+    }
+}
 
 module.exports = {
     getMessages,
-    postMessage
+    postMessage,
+    deleteMessage
 }
