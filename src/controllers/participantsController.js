@@ -1,18 +1,21 @@
 const Participant = require('../model/Participants');
 const { postMessage } = require("./messagesController");
+const dayjs = require('dayjs')
 
 const postParticipant = async (req, res) => {
+    if (!req?.body?.name) return res.status(422).json({'message': 'name is required.'})
+
     const { stripHtml } = await import('string-strip-html');
     const name = stripHtml(req?.body?.name).result.trim();
 
-    if (!name) return res.status(422).json({'message': 'name is required.'})
+    
     if (!typeof name === 'string') return res.status(422).json({'message': 'name must be a string.'})
     const duplicate = await Participant.findOne({ name: name }).exec()
     if (duplicate) return res.sendStatus(409) //Conflict
     try {
         const result = await Participant.create({ 
             "name": name, 
-            "lastStatus": Date.now() 
+            "lastStatus": dayjs().format('HH:mm:ss')
         })
 
         const returnStatus = await postMessage( 

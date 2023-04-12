@@ -1,6 +1,7 @@
-const Message = require("../model/Messages")
-const Participant = require("../model/Participants")
+const Message = require("../model/Messages");
+const Participant = require("../model/Participants");
 const Joi = require('joi');
+const dayjs = require('dayjs')
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
@@ -46,7 +47,7 @@ const getMessages = async (req, res) => {
 }
 
 const postMessage = async (req, res) => {
-    const time = Date.now();
+    const time = dayjs().format('HH:mm:ss');
     const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
@@ -160,7 +161,7 @@ const putMessage = async (req, res) => {
         const { error, value } = messageSchema.validate(req.body);
 
         if (error) {
-            return res.status(422).json({ error: error.details[0].message });
+            return res.status(422).json({ error: error.message });
         }
         const { to, text, type } = value;
 

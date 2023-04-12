@@ -15,7 +15,7 @@ const postStatus = async (req, res) => {
         return res.status(404).json({ message: 'User not found on participants list.' });
       }
   
-      participant.lastStatus = Date.now();
+      participant.lastStatus = dayjs().format('HH:mm:ss');
       await participant.save();
   
       return res.status(200).json({ message: 'Participant status updated.' });

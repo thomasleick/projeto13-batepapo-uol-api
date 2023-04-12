@@ -1,9 +1,10 @@
 const Participant = require('../model/Participants');
 const { postMessage } = require('./messagesController');
+const dayjs = require('dayjs')
 
 const removeInactiveParticipants = async () => {
   try {
-    const tenSecondsAgo = Date.now() - 10000; // 10 seconds in milliseconds
+    const tenSecondsAgo = dayjs(Date.now() - 10000).format('HH:mm:ss'); // 10 seconds in milliseconds
     const inactiveParticipants = await Participant.find({ lastStatus: { $lt: tenSecondsAgo } }).exec();
 
     if (inactiveParticipants.length > 0) {
