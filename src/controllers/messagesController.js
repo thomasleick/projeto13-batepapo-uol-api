@@ -7,7 +7,7 @@ const getMessages = async (req, res) => {
     const user = req.headers.user;
 
     if (!user)
-        return res.status(422).json({'message': 'user is required on header.'})
+        return res.status(422).json({ 'message': 'user is required on header.' })
 
     const limitSchema = Joi.number()
         .integer()
@@ -17,69 +17,75 @@ const getMessages = async (req, res) => {
     try {
         if (limit) {
             const { error, value } = limitSchema.validate(limit);
-    
+
             if (error) {
                 res.status(422).send(error.details[0].message);
                 return;
             }
-    
+
             limit = value;
         } else
             limit = Infinity;
-        
+
         const query = {
             $or: [
-              { type: { $ne: 'private_message' } },
-              { type: 'private_message', to: user },
-              { type: 'private_message', from: user },
-              { type: 'private_message', to: 'Todos' },
+                { type: { $ne: 'private_message' } },
+                { type: 'private_message', to: user },
+                { type: 'private_message', from: user },
+                { type: 'private_message', to: 'Todos' },
             ],
-          };
+        };
         const messages = await Message.find(query)
             .sort({ time: -1 }) // sort by time in descending order
             .limit(limit); // limit the number of messages returned
         res.json(messages);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
-      }
+    }
 }
 
-const postMessage = async(req, res) => {
+const postMessage = async (req, res) => {
     const time = Date.now();
-
+    const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
-          return { ...req.body, from: req.headers?.user };
+            return { ...req.body, from: req.headers?.user };
         }
         return req;
-      };
-      const body = verifyBody(req);
-      const isBody = body.type === 'message' || body.type === 'private_message';
-    
-      const postMessageSchema = isBody
+    };
+    const badBody = verifyBody(req);
+    const body = {};
+
+    for (const prop in badBody) {
+        body[prop] = stripHtml(badBody[prop]).result.trim();
+    }
+
+    const isBody = body.type === 'message' || body.type === 'private_message';
+
+    const postMessageSchema = isBody
         ? Joi.object({
             from: Joi.string().required(),
             to: Joi.string().required(),
             text: Joi.string().required(),
             type: Joi.string().valid('message', 'private_message').required(),
-          })
+        })
         : Joi.object({
             from: Joi.string().required(),
             to: Joi.string().required(),
             text: Joi.string().required(),
             type: Joi.string().valid('status').required(),
-          });
-    
-      const { error, value } = postMessageSchema.validate(body);
+        });
 
-      if (error) {
+    const { error, value } = postMessageSchema.validate(body);
+
+    if (error) {
         if (isBody)
             return res.status(422).json({ message: error.message });
         console.log(error.message)
         return 422
-      }
-  
+    }
+
     const { from, to, text, type } = value;
 
     if (!await Participant.findOne({ name: from }).exec()) {
@@ -92,12 +98,12 @@ const postMessage = async(req, res) => {
         const result = await Message.create({ from, to, text, type, time })
 
         if (isBody)
-            return res.status(201).json({ 'success': `New participant ${from} created!`})
+            return res.status(201).json({ 'success': `Message from ${from} created on db!` })
         return 201;
 
     } catch (err) {
-        if(isBody)
-            return res.status(500).json({'message': err.message})
+        if (isBody)
+            return res.status(500).json({ 'message': err.message })
         return 500;
     }
 

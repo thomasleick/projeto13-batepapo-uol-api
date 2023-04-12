@@ -1,8 +1,10 @@
 const Participant = require('../model/Participants');
-const { postMessage } = require("./messagesController")
+const { postMessage } = require("./messagesController");
 
 const postParticipant = async (req, res) => {
-    const { name } = req?.body
+    const { stripHtml } = await import('string-strip-html');
+    const name = stripHtml(req?.body?.name).result.trim();
+
     if (!name) return res.status(422).json({'message': 'name is required.'})
     if (!typeof name === 'string') return res.status(422).json({'message': 'name must be a string.'})
     const duplicate = await Participant.findOne({ name: name }).exec()
