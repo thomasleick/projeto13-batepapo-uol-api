@@ -1,5 +1,4 @@
 const Participant = require('../model/Participants');
-const Message = require("../model/Messages")
 const { postMessage } = require("./messagesController")
 
 const postParticipant = async (req, res) => {
@@ -20,7 +19,6 @@ const postParticipant = async (req, res) => {
                 to: 'Todos', 
                 text: 'entra na sala...', 
                 type: 'status', 
-                
             }
         )
         if (returnStatus === 201)

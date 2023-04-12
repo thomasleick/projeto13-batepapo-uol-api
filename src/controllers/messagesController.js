@@ -74,25 +74,31 @@ const postMessage = async(req, res) => {
       const { error, value } = postMessageSchema.validate(body);
 
       if (error) {
-        return res.status(422).json({ message: error.message });
+        if (isBody)
+            return res.status(422).json({ message: error.message });
+        console.log(error.message)
+        return 422
       }
   
     const { from, to, text, type } = value;
 
-    if (!await Participant.findOne({ name: from }).exec())
-        return res.status(422).json({ message: 'Name not found on participants list...' });
+    if (!await Participant.findOne({ name: from }).exec()) {
+        if (isBody)
+            return res.status(422).json({ message: 'Name not found on participants list...' });
+        return 422;
+    }
 
     try {
         const result = await Message.create({ from, to, text, type, time })
 
-        console.log(result)
         if (isBody)
             return res.status(201).json({ 'success': `New participant ${from} created!`})
-        return 201
+        return 201;
+
     } catch (err) {
         if(isBody)
             return res.status(500).json({'message': err.message})
-        return 500
+        return 500;
     }
 
 }
