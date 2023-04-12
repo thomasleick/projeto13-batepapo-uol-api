@@ -113,7 +113,7 @@ const deleteMessage = async (req, res) => {
 
     const { id } = req.params;
     const user = req.headers.user;
-    
+
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
 
@@ -122,20 +122,75 @@ const deleteMessage = async (req, res) => {
         // Check if message with given ID exists
         const message = await Message.findOne({ _id: id }).exec();
         if (!message) {
-        return res.status(404).json({ message: 'Message not found' });
+            return res.status(404).json({ message: 'Message not found' });
         }
-    
+
         // Check if user is the owner of the message
         if (message.from !== user) {
-        return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ message: 'Unauthorized' });
         }
 
         // Delete the message from the messages collection
         await Message.deleteOne({ _id: id }).exec();
-        
+
         // Return success message
         return res.json({ message: 'Message deleted successfully' });
-    } 
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ 'message': err.message })
+    }
+}
+
+const putMessage = async (req, res) => {
+
+    const { id } = req.params;
+    const user = req.headers.user;
+
+    if (!id || !user)
+        return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
+
+    try {
+        const messageSchema = Joi.object({
+            to: Joi.string().required(),
+            text: Joi.string().required(),
+            type: Joi.string().valid('message', 'private_message').required(),
+        });
+
+        const { error, value } = messageSchema.validate(req.body);
+
+        if (error) {
+            return res.status(422).json({ error: error.details[0].message });
+        }
+        const { to, text, type } = value;
+
+        // Check if message with given ID exists
+        const message = await Message.findOne({ _id: id }).exec();
+        if (!message) {
+            return res.status(404).json({ message: 'Message not found' });
+        }
+
+        // Check if user is the owner of the message
+        if (message.from !== user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        // Check if user is on Participants list
+        if (!await Participant.findOne({ name: user }).exec()) {
+            return res.status(422).json({ message: 'Name not found on participants list...' });
+        }
+
+        // Update message with new params from body
+        message.to = to;
+        message.text = text;
+        message.type = type;
+
+        // Update message on db
+        await message.save();
+
+        return res.json({ message: 'Message edited successfully' })
+    }
+
+
     catch (err) {
         console.log(err)
         return res.status(500).json({ 'message': err.message })
@@ -145,5 +200,6 @@ const deleteMessage = async (req, res) => {
 module.exports = {
     getMessages,
     postMessage,
-    deleteMessage
+    deleteMessage,
+    putMessage
 }
