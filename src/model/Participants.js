@@ -7,7 +7,7 @@ const participantSchema = new Schema({
         required: true
     },
     lastStatus: {
-        type: String,
+        type: Number,
         required: true
     },
 })

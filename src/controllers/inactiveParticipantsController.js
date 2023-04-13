@@ -4,7 +4,7 @@ const dayjs = require('dayjs')
 
 const removeInactiveParticipants = async () => {
   try {
-    const tenSecondsAgo = dayjs(Date.now() - 10000).format('HH:mm:ss'); // 10 seconds in milliseconds
+    const tenSecondsAgo =  new Date((new Date()).getTime() - 10000); // 10 seconds in milliseconds
     const inactiveParticipants = await Participant.find({ lastStatus: { $lt: tenSecondsAgo } }).exec();
 
     if (inactiveParticipants.length > 0) {
