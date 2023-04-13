@@ -5,7 +5,7 @@ const dayjs = require('dayjs')
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
-    const user = req.headers.user;
+    const user = req.headers.user || req.headers.User;
 
     if (!user)
         return res.status(422).json({ 'message': 'user is required on header.' })
@@ -47,22 +47,24 @@ const getMessages = async (req, res) => {
 }
 
 const postMessage = async (req, res) => {
+    let isBody = true;
     const time = dayjs().format('HH:mm:ss');
     const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
-            return { ...req.body, from: req.headers?.user };
+            const user = req.headers.user || req.headers.User
+            return { ...req.body, from: user };
         }
+        isBody = false;
         return req;
     };
     const badBody = verifyBody(req);
+    
     const body = {};
 
     for (const prop in badBody) {
         body[prop] = stripHtml(badBody[prop]).result.trim();
     }
-
-    const isBody = body.type === 'message' || body.type === 'private_message' || body?.type === "" || body?.type === undefined;
 
     const postMessageSchema = isBody
         ? Joi.object({
@@ -113,7 +115,7 @@ const postMessage = async (req, res) => {
 const deleteMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.user;
+    const user = req.headers.user || req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
@@ -146,7 +148,7 @@ const deleteMessage = async (req, res) => {
 const putMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.user;
+    const user = req.headers.user || req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
