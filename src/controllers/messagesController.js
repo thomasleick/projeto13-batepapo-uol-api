@@ -67,7 +67,6 @@ const postMessage = async (req, res) => {
         return req;
     };
     const badBody = verifyBody(req);
-    console.log(req.headers)
     
     const body = {};
 
@@ -94,11 +93,13 @@ const postMessage = async (req, res) => {
         return 422
     }
 
-    for (const prop in badBody) {
-        body[prop] = stripHtml(badBody[prop]).result.trim();
+    for (const prop in value) {
+        body[prop] = stripHtml(value[prop]).result.trim();
     }
 
-    const { from, to, text, type } = value;
+    const { from, to, text, type } = body;
+
+
 
     if (!await Participant.findOne({ name: from }).exec()) {
         if (isBody)
