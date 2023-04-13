@@ -62,7 +62,7 @@ const postMessage = async (req, res) => {
         body[prop] = stripHtml(badBody[prop]).result.trim();
     }
 
-    const isBody = body.type === 'message' || body.type === 'private_message';
+    const isBody = body.type === 'message' || body.type === 'private_message' || body?.type === "" || body?.type === undefined;
 
     const postMessageSchema = isBody
         ? Joi.object({
@@ -78,7 +78,7 @@ const postMessage = async (req, res) => {
             type: Joi.string().valid('status').required(),
         });
 
-    const { error, value } = postMessageSchema.validate(body);
+    const { error, value } = postMessageSchema.validate(badBody);
 
     if (error) {
         if (isBody)

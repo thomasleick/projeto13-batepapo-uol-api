@@ -1,6 +1,5 @@
 const Participant = require('../model/Participants');
 const { postMessage } = require("./messagesController");
-const dayjs = require('dayjs')
 
 const postParticipant = async (req, res) => {
     if (!req?.body?.name) return res.status(422).json({'message': 'name is required.'})
@@ -40,9 +39,9 @@ const getParticipants = async (req, res) => {
         
         if (!result) return res.status(204).json([]);
 
-        const participantsList = result.map(participant => participant.name)
+        //const participantsList = result.map(participant => participant.name)
         
-        res.json(participantsList);
+        res.json(result);
 
     } catch (err) {
         return res.status(500).json({ 'message': err.message })
