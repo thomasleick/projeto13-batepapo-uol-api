@@ -5,7 +5,7 @@ const dayjs = require('dayjs')
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
-    const user = req.headers.user || req.headers.User;
+    const user = req.headers.User;
 
     if (!user)
         return res.status(422).json({ 'message': 'user is required on header.' })
@@ -20,13 +20,13 @@ const getMessages = async (req, res) => {
             const { error, value } = limitSchema.validate(limit);
 
             if (error) {
-                res.status(422).send(error.details[0].message);
+                res.status(422).send(error.message);
                 return;
             }
 
             limit = value;
         } else
-            limit = Infinity;
+            limit = 0;
 
         const query = {
             $or: [
@@ -36,9 +36,17 @@ const getMessages = async (req, res) => {
                 { type: 'private_message', to: 'Todos' },
             ],
         };
-        const messages = await Message.find(query)
+        let messages
+        if (limit) {
+            messages = await Message.find(query)
             .sort({ time: -1 }) // sort by time in descending order
             .limit(limit); // limit the number of messages returned
+        }
+        else {
+            messages = await Message.find(query)
+            .sort({ time: -1 }) // sort by time in descending order
+        }
+        
         res.json(messages);
     } catch (err) {
         console.error(err);
@@ -52,7 +60,7 @@ const postMessage = async (req, res) => {
     const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
-            const user = req.headers.user || req.headers.User
+            const user = req.headers.User
             return { ...req.body, from: user };
         }
         isBody = false;
@@ -115,7 +123,7 @@ const postMessage = async (req, res) => {
 const deleteMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.user || req.headers.User;
+    const user = req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
@@ -148,7 +156,7 @@ const deleteMessage = async (req, res) => {
 const putMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.user || req.headers.User;
+    const user = req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });

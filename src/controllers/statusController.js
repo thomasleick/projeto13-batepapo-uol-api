@@ -3,7 +3,7 @@ const Participant = require('../model/Participants')
 const postStatus = async (req, res) => {
     
     try {
-      const user = req.headers.user;
+      const user = req.headers.User;
   
       if (!user) {
         return res.status(404).json({ message: 'User is required on header.' });
