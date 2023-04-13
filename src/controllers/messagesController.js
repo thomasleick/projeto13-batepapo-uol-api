@@ -5,7 +5,7 @@ const dayjs = require('dayjs')
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
-    const user = req.headers.User;
+    const user = req.headers.user || req.headers.User;
 
     if (!user)
         return res.status(422).json({ 'message': 'user is required on header.' })
@@ -60,19 +60,16 @@ const postMessage = async (req, res) => {
     const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
-            const user = req.headers.User
+            const user = req.headers.user || req.headers.User
             return { ...req.body, from: user };
         }
         isBody = false;
         return req;
     };
     const badBody = verifyBody(req);
+    console.log(req.headers)
     
     const body = {};
-
-    for (const prop in badBody) {
-        body[prop] = stripHtml(badBody[prop]).result.trim();
-    }
 
     const postMessageSchema = isBody
         ? Joi.object({
@@ -95,6 +92,10 @@ const postMessage = async (req, res) => {
             return res.status(422).json({ message: error.message });
         console.log(error.message)
         return 422
+    }
+
+    for (const prop in badBody) {
+        body[prop] = stripHtml(badBody[prop]).result.trim();
     }
 
     const { from, to, text, type } = value;
@@ -123,7 +124,7 @@ const postMessage = async (req, res) => {
 const deleteMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.User;
+    const user = req.headers.user || req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
@@ -156,7 +157,7 @@ const deleteMessage = async (req, res) => {
 const putMessage = async (req, res) => {
 
     const { id } = req.params;
-    const user = req.headers.User;
+    const user = req.headers.user || req.headers.User;
 
     if (!id || !user)
         return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
