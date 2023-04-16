@@ -27,4 +27,4 @@ const postStatus = async (req, res) => {
 
 module.exports = {
     postStatus
-}
+};

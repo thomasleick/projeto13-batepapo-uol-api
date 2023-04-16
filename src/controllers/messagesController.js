@@ -6,28 +6,27 @@ const dayjs = require('dayjs')
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
     const user = req.headers.user || req.headers.User;
-
-    if (!user)
-        return res.status(422).json({ 'message': 'user is required on header.' })
+    if (!user) {
+        res.status(422).json({ 'message': 'user is required on header.' });
+        return 422;
+    }
 
     const limitSchema = Joi.number()
         .integer()
         .min(1)
         .required();
-
     try {
         if (limit) {
             const { error, value } = limitSchema.validate(limit);
 
             if (error) {
                 res.status(422).send(error.message);
-                return;
+                return 422;
             }
 
             limit = value;
         } else
             limit = 0;
-
         const query = {
             $or: [
                 { type: { $ne: 'private_message' } },
@@ -44,7 +43,7 @@ const getMessages = async (req, res) => {
         }
         else {
             messages = await Message.find(query)
-            .sort({ time: -1 }) // sort by time in descending order
+            .sort({ time: -1 }); // sort by time in descending order
         }
         
         res.json(messages);
@@ -87,10 +86,11 @@ const postMessage = async (req, res) => {
     const { error, value } = postMessageSchema.validate(badBody);
 
     if (error) {
-        if (isBody)
-            return res.status(422).json({ message: error.message });
-        console.log(error.message)
-        return 422
+        if (isBody) {
+            res.status(422).json({ message: error.message });
+        }
+        console.log(error.message);
+        return 422;
     }
 
     for (const prop in value) {
@@ -99,24 +99,23 @@ const postMessage = async (req, res) => {
 
     const { from, to, text, type } = body;
 
-
-
     if (!await Participant.findOne({ name: from }).exec()) {
-        if (isBody)
-            return res.status(422).json({ message: 'Name not found on participants list...' });
+        if (isBody) {
+            res.status(422).json({ message: 'Name not found on participants list...' });
+        }
         return 422;
     }
 
     try {
-        const result = await Message.create({ from, to, text, type, time })
+        await Message.create({ from, to, text, type, time });
 
         if (isBody)
-            return res.status(201).json({ 'success': `Message from ${from} created on db!` })
+            res.status(201).json({ 'success': `Message from ${from} created on db!` });
         return 201;
 
     } catch (err) {
         if (isBody)
-            return res.status(500).json({ 'message': err.message })
+            res.status(500).json({ 'message': err.message });
         return 500;
     }
 
@@ -127,31 +126,36 @@ const deleteMessage = async (req, res) => {
     const { id } = req.params;
     const user = req.headers.user || req.headers.User;
 
-    if (!id || !user)
-        return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
-
+    if (!id || !user) {
+        res.status(422).json({ 'message': 'user is required on header and id on path params...' });
+        return 422;
+    }
 
     try {
         // Check if message with given ID exists
         const message = await Message.findOne({ _id: id }).exec();
         if (!message) {
-            return res.status(404).json({ message: 'Message not found' });
+            res.status(404).json({ message: 'Message not found' });
+            return 404;
         }
 
         // Check if user is the owner of the message
         if (message.from !== user) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            res.status(401).json({ message: 'Unauthorized' });
+            return 401;
         }
 
         // Delete the message from the messages collection
         await Message.deleteOne({ _id: id }).exec();
 
         // Return success message
-        return res.json({ message: 'Message deleted successfully' });
+        res.json({ message: 'Message deleted successfully' });
+        return 200;
     }
     catch (err) {
-        console.log(err)
-        return res.status(500).json({ 'message': err.message })
+        console.log(err);
+        res.status(500).json({ 'message': err.message });
+        return 500;
     }
 }
 
@@ -173,23 +177,27 @@ const putMessage = async (req, res) => {
         const { error, value } = messageSchema.validate(req.body);
 
         if (error) {
-            return res.status(422).json({ error: error.message });
+            res.status(422).json({ error: error.message });
+            return 422;
         }
         const { to, text, type } = value;
 
         // Check if message with given ID exists
         const message = await Message.findOne({ _id: id }).exec();
         if (!message) {
-            return res.status(404).json({ message: 'Message not found' });
+            res.status(404).json({ message: 'Message not found' });
+            return 404;
         }
 
         // Check if user is the owner of the message
         if (message.from !== user) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            res.status(401).json({ message: 'Unauthorized' });
+            return 401;
         }
         // Check if user is on Participants list
         if (!await Participant.findOne({ name: user }).exec()) {
-            return res.status(422).json({ message: 'Name not found on participants list...' });
+            res.status(422).json({ message: 'Name not found on participants list...' });
+            return 422;
         }
 
         // Update message with new params from body
@@ -200,13 +208,15 @@ const putMessage = async (req, res) => {
         // Update message on db
         await message.save();
 
-        return res.json({ message: 'Message edited successfully' })
+        res.json({ message: 'Message edited successfully' });
+        return 200;
     }
 
 
     catch (err) {
         console.log(err)
-        return res.status(500).json({ 'message': err.message })
+        res.status(500).json({ 'message': err.message });
+        return 500;
     }
 }
 
@@ -215,4 +225,4 @@ module.exports = {
     postMessage,
     deleteMessage,
     putMessage
-}
+};

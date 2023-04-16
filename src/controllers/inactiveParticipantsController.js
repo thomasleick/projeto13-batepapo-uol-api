@@ -1,6 +1,5 @@
 const Participant = require('../model/Participants');
 const { postMessage } = require('./messagesController');
-const dayjs = require('dayjs')
 
 const removeInactiveParticipants = async () => {
   try {
