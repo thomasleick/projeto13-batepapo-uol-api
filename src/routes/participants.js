@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const participantsController = require('../controllers/participantsController')
+const express = require('express');
+const router = express.Router();
+const participantsController = require('../controllers/participantsController');
 
-router.post('/', participantsController.postParticipant)
-router.get('/', participantsController.getParticipants)
+router.post('/', participantsController.postParticipant);
+router.get('/', participantsController.getParticipants);
 
-module.exports = router
+module.exports = router;
