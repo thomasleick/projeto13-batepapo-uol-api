@@ -7,8 +7,7 @@ const getMessages = async (req, res) => {
     let limit = req.query.limit;
     const user = req.headers.user || req.headers.User;
     if (!user) {
-        res.status(422).json({ 'message': 'user is required on header.' });
-        return 422;
+        return res.status(422).json({ 'message': 'user is required on header.' });
     }
 
     const limitSchema = Joi.number()
@@ -20,8 +19,7 @@ const getMessages = async (req, res) => {
             const { error, value } = limitSchema.validate(limit);
 
             if (error) {
-                res.status(422).send(error.message);
-                return 422;
+                return res.status(422).send(error.message);
             }
 
             limit = value;
@@ -46,11 +44,10 @@ const getMessages = async (req, res) => {
             .sort({ time: -1 }); // sort by time in descending order
         }
         
-        res.json(messages);
+        return res.json(messages);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
-        return 500;
+        return res.status(500).send('Server Error');
     }
 };
 
@@ -88,7 +85,7 @@ const postMessage = async (req, res) => {
 
     if (error) {
         if (isBody) {
-            res.status(422).json({ message: error.message });
+            return res.status(422).json({ message: error.message });
         }
         console.log(error.message);
         return 422;
@@ -102,7 +99,7 @@ const postMessage = async (req, res) => {
 
     if (!await Participant.findOne({ name: from }).exec()) {
         if (isBody) {
-            res.status(422).json({ message: 'Name not found on participants list...' });
+            return res.status(422).json({ message: 'Name not found on participants list...' });
         }
         return 422;
     }
@@ -111,12 +108,12 @@ const postMessage = async (req, res) => {
         await Message.create({ from, to, text, type, time });
 
         if (isBody)
-            res.status(201).json({ 'success': `Message from ${from} created on db!` });
+            return res.status(201).json({ 'success': `Message from ${from} created on db!` });
         return 201;
 
     } catch (err) {
         if (isBody)
-            res.status(500).json({ 'message': err.message });
+            return res.status(500).json({ 'message': err.message });
         return 500;
     }
 };
@@ -127,35 +124,30 @@ const deleteMessage = async (req, res) => {
     const user = req.headers.user || req.headers.User;
 
     if (!id || !user) {
-        res.status(422).json({ 'message': 'user is required on header and id on path params...' });
-        return 422;
+        return res.status(422).json({ 'message': 'user is required on header and id on path params...' });
     }
 
     try {
         // Check if message with given ID exists
         const message = await Message.findOne({ _id: id }).exec();
         if (!message) {
-            res.status(404).json({ message: 'Message not found' });
-            return 404;
+            return res.status(404).json({ message: 'Message not found' });
         }
 
         // Check if user is the owner of the message
         if (message.from !== user) {
-            res.status(401).json({ message: 'Unauthorized' });
-            return 401;
+            return res.status(401).json({ message: 'Unauthorized' });
         }
 
         // Delete the message from the messages collection
         await Message.deleteOne({ _id: id }).exec();
 
         // Return success message
-        res.json({ message: 'Message deleted successfully' });
-        return 200;
+        return res.json({ message: 'Message deleted successfully' });
     }
     catch (err) {
         console.log(err);
-        res.status(500).json({ 'message': err.message });
-        return 500;
+        return res.status(500).json({ 'message': err.message });
     }
 };
 
@@ -177,27 +169,23 @@ const putMessage = async (req, res) => {
         const { error, value } = messageSchema.validate(req.body);
 
         if (error) {
-            res.status(422).json({ error: error.message });
-            return 422;
+            return res.status(422).json({ error: error.message });
         }
         const { to, text, type } = value;
 
         // Check if message with given ID exists
         const message = await Message.findOne({ _id: id }).exec();
         if (!message) {
-            res.status(404).json({ message: 'Message not found' });
-            return 404;
+            return res.status(404).json({ message: 'Message not found' });
         }
 
         // Check if user is the owner of the message
         if (message.from !== user) {
-            res.status(401).json({ message: 'Unauthorized' });
-            return 401;
+            return res.status(401).json({ message: 'Unauthorized' });
         }
         // Check if user is on Participants list
         if (!await Participant.findOne({ name: user }).exec()) {
-            res.status(422).json({ message: 'Name not found on participants list...' });
-            return 422;
+            return res.status(422).json({ message: 'Name not found on participants list...' });
         }
 
         // Update message with new params from body
@@ -208,15 +196,13 @@ const putMessage = async (req, res) => {
         // Update message on db
         await message.save();
 
-        res.json({ message: 'Message edited successfully' });
-        return 200;
+        return res.json({ message: 'Message edited successfully' });
     }
 
 
     catch (err) {
         console.log(err);
-        res.status(500).json({ 'message': err.message });
-        return 500;
+        return res.status(500).json({ 'message': err.message });
     }
 };
 
