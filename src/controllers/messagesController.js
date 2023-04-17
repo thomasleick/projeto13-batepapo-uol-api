@@ -1,7 +1,7 @@
 const Message = require("../model/Messages");
 const Participant = require("../model/Participants");
 const Joi = require('joi');
-const dayjs = require('dayjs')
+const dayjs = require('dayjs');
 
 const getMessages = async (req, res) => {
     let limit = req.query.limit;
@@ -35,7 +35,7 @@ const getMessages = async (req, res) => {
                 { type: 'private_message', to: 'Todos' },
             ],
         };
-        let messages
+        let messages;
         if (limit) {
             messages = await Message.find(query)
             .sort({ time: -1 }) // sort by time in descending order
@@ -50,8 +50,9 @@ const getMessages = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
+        return 500;
     }
-}
+};
 
 const postMessage = async (req, res) => {
     let isBody = true;
@@ -59,7 +60,7 @@ const postMessage = async (req, res) => {
     const { stripHtml } = await import('string-strip-html');
     const verifyBody = (req) => {
         if (req.body) {
-            const user = req.headers.user || req.headers.User
+            const user = req.headers.user || req.headers.User;
             return { ...req.body, from: user };
         }
         isBody = false;
@@ -118,8 +119,7 @@ const postMessage = async (req, res) => {
             res.status(500).json({ 'message': err.message });
         return 500;
     }
-
-}
+};
 
 const deleteMessage = async (req, res) => {
 
@@ -157,7 +157,7 @@ const deleteMessage = async (req, res) => {
         res.status(500).json({ 'message': err.message });
         return 500;
     }
-}
+};
 
 const putMessage = async (req, res) => {
 
@@ -214,11 +214,11 @@ const putMessage = async (req, res) => {
 
 
     catch (err) {
-        console.log(err)
+        console.log(err);
         res.status(500).json({ 'message': err.message });
         return 500;
     }
-}
+};
 
 module.exports = {
     getMessages,

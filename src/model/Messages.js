@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const messageSchema = new Schema({
     from: {
@@ -22,6 +22,6 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
-})
+});
 
-module.exports = mongoose.model('Message', messageSchema)
+module.exports = mongoose.model('Message', messageSchema);

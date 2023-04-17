@@ -25,4 +25,4 @@ mongoose.connection.once('open', () => {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   // Set up the interval to run the function every 15 seconds
   setInterval(removeInactiveParticipants, 15000);
-})
+});

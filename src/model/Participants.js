@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const participantSchema = new Schema({
     name: {
@@ -10,6 +10,6 @@ const participantSchema = new Schema({
         type: Number,
         required: true
     },
-})
+});
 
-module.exports = mongoose.model('Participant', participantSchema)
+module.exports = mongoose.model('Participant', participantSchema);

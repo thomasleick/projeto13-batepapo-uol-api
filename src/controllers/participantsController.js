@@ -9,14 +9,14 @@ const postParticipant = async (req, res) => {
     const name = stripHtml(req?.body?.name).result.trim();
 
     const duplicate = await Participant.findOne({ name: name }).exec();
-    if (duplicate) return res.sendStatus(409) //Conflict
+    if (duplicate) return res.sendStatus(409); //Conflict
     try {
         await Participant.create({ 
             "name": name, 
             "lastStatus": new Date().getTime()
         });
 
-        const returnStatus = await postMessage( 
+        await postMessage( 
             { 
                 from: name, 
                 to: 'Todos', 
@@ -24,12 +24,11 @@ const postParticipant = async (req, res) => {
                 type: 'status', 
             }
         );
-        if (returnStatus === 201)
-            return res.status(201).json({ 'success': `New participant ${name} created!`});
+        return res.status(201).json({ 'success': `New participant ${name} created!`});
     } catch (err) {
         return res.status(500).json({'message': err.message});
     }
-}
+};
 
 
 const getParticipants = async (req, res) => {
@@ -44,7 +43,7 @@ const getParticipants = async (req, res) => {
     } catch (err) {
         return res.status(500).json({ 'message': err.message });
     }
-}
+};
 
 module.exports = {
     postParticipant,

@@ -1,4 +1,4 @@
-const Participant = require('../model/Participants')
+const Participant = require('../model/Participants');
 
 const postStatus = async (req, res) => {
     
